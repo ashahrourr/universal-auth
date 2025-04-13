@@ -1,7 +1,15 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { LoginComponentProps } from "./LoginComponentProps"
 
-const LoginPage: React.FC<{ onSubmit?: (email: string) => Promise<void> }> = ({ onSubmit }) => {
+const LoginPage: React.FC<
+  { onSubmit?: (email: string) => Promise<void> } & LoginComponentProps
+> = ({
+  onSubmit,
+  logo,
+  primaryColor = "#2563eb",
+  translations = {},
+}) => {
   const [email, setEmail] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState("")
@@ -14,7 +22,7 @@ const LoginPage: React.FC<{ onSubmit?: (email: string) => Promise<void> }> = ({ 
 
   const handleSubmit = async () => {
     if (email && !validateEmail(email)) {
-      setError("Please enter a valid email address")
+      setError(translations.errorInvalidEmail ?? "Please enter a valid email address")
       return
     }
 
@@ -23,9 +31,9 @@ const LoginPage: React.FC<{ onSubmit?: (email: string) => Promise<void> }> = ({ 
 
     try {
       await onSubmit?.(email)
-      navigate("/") // redirect to home
+      navigate("/")
     } catch {
-      setError("Login failed.")
+      setError(translations.errorLoginFailed ?? "Login failed.")
     } finally {
       setIsSubmitting(false)
     }
@@ -42,9 +50,15 @@ const LoginPage: React.FC<{ onSubmit?: (email: string) => Promise<void> }> = ({ 
         flexDirection: "column",
         gap: "1.5rem"
       }}>
+        {logo && <div style={{ marginBottom: "1rem", textAlign: "center" }}>{logo}</div>}
+
         <div style={{ textAlign: "center" }}>
-          <h2 style={{ fontSize: "1.75rem", fontWeight: 600 }}>Welcome 👋</h2>
-          <p style={{ color: "#6b7280", marginTop: "0.25rem" }}>Login with 1 click</p>
+          <h2 style={{ fontSize: "1.75rem", fontWeight: 600 }}>
+            {translations.welcomeMessage ?? "Welcome 👋"}
+          </h2>
+          <p style={{ color: "#6b7280", marginTop: "0.25rem" }}>
+            {translations.loginButton ?? "Login with 1 click"}
+          </p>
         </div>
 
         <button
@@ -52,7 +66,7 @@ const LoginPage: React.FC<{ onSubmit?: (email: string) => Promise<void> }> = ({ 
           disabled={isSubmitting}
           style={{
             width: "100%",
-            background: "linear-gradient(to bottom right, #2563eb, #3b82f6)",
+            background: `linear-gradient(to bottom right, ${primaryColor}, ${primaryColor})`,
             color: "white",
             padding: "0.75rem 1.5rem",
             borderRadius: "0.5rem",
@@ -64,12 +78,17 @@ const LoginPage: React.FC<{ onSubmit?: (email: string) => Promise<void> }> = ({ 
             transition: "opacity 0.2s ease"
           }}
         >
-          {isSubmitting ? "Logging in..." : "Login with Universal ID"}
+          {isSubmitting
+            ? translations.loginButton ?? "Logging in..."
+            : translations.loginButton ?? "Login with Universal ID"}
         </button>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           <label style={{ fontSize: "0.875rem", color: "#374151" }}>
-            Email (optional for recovery)
+            {translations.emailLabel ?? "Email"}{" "}
+            <span style={{ color: "#9ca3af", marginLeft: "0.25rem" }}>
+              {translations.emailOptionalHint ?? "(optional for recovery)"}
+            </span>
           </label>
           <input
             type="email"

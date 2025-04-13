@@ -2,6 +2,7 @@
 import React, { createContext, useContext } from "react"
 import { useUniversalLogin } from "../useUniversalLogin"
 
+
 const AuthContext = createContext<ReturnType<typeof useUniversalLogin> | null>(null)
 
 export const UniversalAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

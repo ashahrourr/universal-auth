@@ -2,3 +2,5 @@
 export { UniversalAuthProvider } from "./provider/UniversalAuthProvider"
 export { useAuth } from "./hooks/useAuth"
 export { default as LoginPage } from "./components/LoginPage"
+export { configureAuth } from "./config"
+

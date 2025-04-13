@@ -1,111 +1,159 @@
-// useUniversalLogin.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect } from "react"
+import { getAuthConfig } from "./config"
+import { AuthError } from "./errors"
 
-const API_URL = "https://universal-auth.onrender.com";
-
-interface User {
+export interface User {
   id: string;
   token: string;
 }
 
 interface DecodedToken {
-  exp: number;
-  sub: string;
+  exp: number
+  sub: string
 }
 
+let refreshTimeout: ReturnType<typeof setTimeout> | null = null
+
 export function useUniversalLogin() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
 
   const decodeToken = (token: string): DecodedToken => {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return { exp: Number(payload.exp), sub: payload.sub };
-  };
+    const payload = JSON.parse(atob(token.split(".")[1]))
+    return { exp: Number(payload.exp), sub: payload.sub }
+  }
+
+  const validateToken = (token: string): boolean => {
+    try {
+      const { exp } = decodeToken(token)
+      return Date.now() < exp * 1000
+    } catch {
+      return false
+    }
+  }
+
+  const scheduleTokenRefresh = (exp: number) => {
+    if (refreshTimeout) clearTimeout(refreshTimeout)
+
+    const delay = exp * 1000 - Date.now() - 60_000 // 1 min before expiry
+    if (delay <= 0) return refreshToken()
+
+    refreshTimeout = setTimeout(() => {
+      refreshToken()
+    }, delay)
+  }
 
   const refreshToken = async () => {
-    const refresh_token = localStorage.getItem("uauth-refresh");
-    if (!refresh_token) return logout();
+    const { apiUrl, refreshTokenStorage, tokenStorage } = getAuthConfig()
 
-    const res = await fetch(`${API_URL}/auth/refresh`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token }),
-    });
+    const refresh_token = refreshTokenStorage?.getItem("uauth-refresh")
+    if (!refresh_token) return logout()
 
-    if (!res.ok) return logout();
+    const currentToken = tokenStorage?.getItem("uauth-token")
+    if (currentToken && validateToken(currentToken)) return
 
-    const data = await res.json();
-    const newToken = data.access_token;
-    const { sub } = decodeToken(newToken);
+    try {
+      const res = await fetch(`${apiUrl}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token }),
+      })
 
-    localStorage.setItem("uauth-token", newToken);
-    setUser({ id: sub, token: newToken });
-  };
+      if (!res.ok) throw new Error(AuthError.InvalidToken)
+
+      const data = await res.json()
+      const newToken = data.access_token
+      const { sub, exp } = decodeToken(newToken)
+
+      tokenStorage?.setItem("uauth-token", newToken)
+      setUser({ id: sub, token: newToken })
+      scheduleTokenRefresh(exp)
+    } catch {
+      logout()
+    }
+  }
 
   useEffect(() => {
-    const token = localStorage.getItem("uauth-token");
-    const id = localStorage.getItem("uauth-id");
-    const refresh = localStorage.getItem("uauth-refresh");
+    const { tokenStorage, refreshTokenStorage } = getAuthConfig()
+
+    const token = tokenStorage?.getItem("uauth-token")
+    const id = tokenStorage?.getItem("uauth-id")
+    const refresh = refreshTokenStorage?.getItem("uauth-refresh")
 
     if (token && id) {
-      const { exp } = decodeToken(token);
-      const currentTime = Math.floor(Date.now() / 1000);
-      const isExpired = currentTime > exp;
+      const { exp } = decodeToken(token)
+      const currentTime = Math.floor(Date.now() / 1000)
+      const isExpired = currentTime > exp
 
       if (isExpired && refresh) {
-        refreshToken();
+        refreshToken()
       } else {
-        setUser({ id, token });
+        setUser({ id, token })
+        scheduleTokenRefresh(exp)
       }
     }
 
-    setLoading(false);
-  }, []);
+    setLoading(false)
+  }, [])
 
   const handleLogin = async (email: string) => {
-    let deviceId = localStorage.getItem("uauth-device-id");
-    if (!deviceId) {
-      deviceId = crypto.randomUUID();
-      localStorage.setItem("uauth-device-id", deviceId);
-    }
+    const { apiUrl, tokenStorage, refreshTokenStorage } = getAuthConfig()
 
-    const res = await fetch(`${API_URL}/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ device_id: deviceId }),
-    });
+    try {
+      let deviceId = tokenStorage?.getItem("uauth-device-id")
+      if (!deviceId) {
+        deviceId = crypto.randomUUID()
+        tokenStorage?.setItem("uauth-device-id", deviceId)
+      }
 
-    const data = await res.json();
-    const token = data.access_token;
-    const refresh_token = data.refresh_token;
-    const { sub } = decodeToken(token);
-
-    localStorage.setItem("uauth-token", token);
-    localStorage.setItem("uauth-refresh", refresh_token);
-    localStorage.setItem("uauth-id", sub);
-
-    if (email) {
-      await fetch(`${API_URL}/auth/email`, {
+      const res = await fetch(`${apiUrl}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ user_id: sub, email }),
-      });
-    }
+        body: JSON.stringify({ device_id: deviceId }),
+      })
 
-    setUser({ id: sub, token });
-  };
+      if (!res.ok) throw new Error(AuthError.LoginFailed)
+
+      const data = await res.json()
+      const token = data.access_token
+      const refresh_token = data.refresh_token
+      const { sub, exp } = decodeToken(token)
+
+      tokenStorage?.setItem("uauth-token", token)
+      refreshTokenStorage?.setItem("uauth-refresh", refresh_token)
+      tokenStorage?.setItem("uauth-id", sub)
+
+      if (email) {
+        await fetch(`${apiUrl}/auth/email`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: sub, email }),
+        })
+      }
+
+      setUser({ id: sub, token })
+      scheduleTokenRefresh(exp)
+    } catch (error: any) {
+      if (error instanceof TypeError) {
+        throw new Error(AuthError.NetworkError)
+      }
+      throw new Error(error.message || AuthError.UnknownError)
+    }
+  }
 
   const logout = () => {
-    localStorage.removeItem("uauth-token");
-    localStorage.removeItem("uauth-refresh");
-    localStorage.removeItem("uauth-id");
-    setUser(null);
-  };
+    const { tokenStorage, refreshTokenStorage } = getAuthConfig()
+    tokenStorage?.removeItem("uauth-token")
+    tokenStorage?.removeItem("uauth-id")
+    refreshTokenStorage?.removeItem("uauth-refresh")
+    if (refreshTimeout) clearTimeout(refreshTimeout)
+    setUser(null)
+  }
 
   return {
     user,
     handleLogin,
     logout,
-    loading
-  };
+    loading,
+  }
 }

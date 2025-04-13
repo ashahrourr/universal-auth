@@ -1,23 +1,48 @@
 {
-  "name": "sdk",
+  "name": "@ashahrour/universal-auth",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "1-click login SDK for modern web apps. No passwords. No config.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "tsup src/index.ts --format esm,cjs --dts --out-dir dist --tsconfig tsconfig.json",
+    "prepare": "npm run build",
+    "test": "echo \"No tests yet\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": [
+    "auth",
+    "login",
+    "jwt",
+    "sdk",
+    "react",
+    "authentication",
+    "universal-auth"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourname/universal-auth"
+  },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "axios": "^1.8.4",
-    "react": "^19.1.0",
-    "react-router-dom": "^7.5.0"
+    "react": "^18.0.0 || ^19.0.0",
+    "react-router-dom": "^6.0.0 || ^7.0.0"
   },
   "devDependencies": {
     "@types/react": "^19.1.1",
+    "tsup": "^7.2.0",
     "typescript": "^5.8.3",
     "vite": "^6.2.6"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "react-router-dom": "^6.0.0 || ^7.0.0"
   }
 }
