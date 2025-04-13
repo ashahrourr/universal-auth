@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from fastapi import Request
 from app.utils.auth import get_current_user
 from fastapi import Depends
+from fastapi.responses import HTMLResponse
 
 app = FastAPI()
 
@@ -80,3 +81,7 @@ def store_email(payload: EmailPayload):
 @app.get("/auth/protected")
 def protected_route(user_id: str = Depends(get_current_user)):
     return { "message": f"Hello {user_id}, you accessed a protected route!" }
+
+@app.get("/")
+def root():
+    return ("root")
