@@ -1,2 +1,32 @@
-# .gitignore
+# Node.js dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+
+# Vite/React cache
+.vite/
+.cache/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE/editor files
+.vscode/
+.idea/
+.DS_Store
+
+# Demo app (optional - if you don't want to commit it)
 demo_app/
+
+# OS metadata
+Thumbs.db
