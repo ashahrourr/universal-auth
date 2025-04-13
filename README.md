@@ -18,17 +18,17 @@ No passwords. No redirects. No config.
 ## 📦 Installation
 
 ```bash
-npm install @yourname/universal-auth
+npm install @ashahrour/universal-auth
 ```
 
 ---
 
 ## ⚙️ Quick Start
 
-### 1. Wrap your app
+### 1. Wrap your app with the provider
 
 ```tsx
-import { UniversalAuthProvider } from "@yourname/universal-auth"
+import { UniversalAuthProvider } from "@ashahrour/universal-auth"
 
 <UniversalAuthProvider>
   <App />
@@ -37,33 +37,37 @@ import { UniversalAuthProvider } from "@yourname/universal-auth"
 
 ---
 
-### 2. Add the login page route
+### 2. Use the hook and `<LoginPage />` component
 
 ```tsx
-import { LoginPage } from "@yourname/universal-auth"
+import { useAuth, LoginPage } from "@ashahrour/universal-auth"
 
-<Route path="/login" element={<LoginPage />} />
-```
+function App() {
+  const { user, login, logout, loading } = useAuth()
 
----
+  if (loading) return <p>Loading...</p>
 
-### 3. Use the hook
-
-```tsx
-import { useAuth } from "@yourname/universal-auth"
-
-const { user, login, logout, loading } = useAuth()
-
-if (loading) return <p>Loading...</p>
-
-return user ? (
-  <>
-    <p>Logged in as: {user.id}</p>
-    <button onClick={logout}>Logout</button>
-  </>
-) : (
-    <button onClick={login}>Login</button>
-)
+  return user ? (
+    <>
+      <p>Welcome: {user.id}</p>
+      <button onClick={logout}>Logout</button>
+    </>
+  ) : (
+    <LoginPage
+      onSubmit={login}
+      primaryColor="#2563eb"
+      translations={{
+        welcomeMessage: "Welcome to My App",
+        loginButton: "Sign In Securely",
+        emailLabel: "Recovery Email",
+        emailOptionalHint: "(optional)",
+        loggingIn: "Logging in...",
+        errorInvalidEmail: "Invalid email",
+        errorLoginFailed: "Login failed",
+      }}
+    />
+  )
+}
 ```
 
 ---
@@ -75,10 +79,13 @@ return user ? (
   logo={<img src="/logo.svg" width={40} />}
   primaryColor="#10b981"
   translations={{
-    welcomeMessage: "Welcome to MyApp",
-    emailLabel: "Recovery Email",
-    loginButton: "Continue",
-    loggingIn: "Logging in..."
+    welcomeMessage: "Hello 👋",
+    loginButton: "Login",
+    loggingIn: "Logging in...",
+    emailLabel: "Email",
+    emailOptionalHint: "(optional)",
+    errorInvalidEmail: "Please enter a valid email",
+    errorLoginFailed: "Login failed. Try again.",
   }}
 />
 ```
@@ -87,10 +94,10 @@ return user ? (
 
 ## 🛡️ Security Notes
 
-- ✅ Uses `localStorage` to store JWT tokens  
-- ✅ Refresh tokens handled automatically  
-- 🔐 For production, use HTTPS and implement CSRF protection  
-- 🔐 Email is optional, used for recovery only
+- ✅ Uses `localStorage` to store JWT and refresh tokens  
+- 🔁 Automatically refreshes access tokens before expiration  
+- 🔐 Email is optional and used for account recovery  
+- ⚠️ For production, use HTTPS and consider CSRF protection
 
 ---
 
@@ -100,10 +107,10 @@ Firebase, Clerk, and Auth0 are great — but not always simple.
 Universal Auth is for when you want:
 
 ✅ 1-click login  
-✅ No config or setup  
-✅ Fast integration with beautiful defaults  
+✅ Zero config  
+✅ Lightweight integration with beautiful defaults  
 
-Perfect for MVPs, dashboards, internal tools, and indie projects.
+Perfect for MVPs, internal tools, dashboards, and indie SaaS products.
 
 ---
 
@@ -113,11 +120,12 @@ Perfect for MVPs, dashboards, internal tools, and indie projects.
 - 🔐 Secure storage support  
 - 📱 React Native compatibility  
 - 📊 Analytics hooks (opt-in)  
-- 📄 Full documentation site
+- 📄 Full documentation site  
 
 ---
 
 ## 📣 Try It
 
-Just install. Add one provider. You’re done ✅  
+Just install. Wrap your app.  
+You're done ✅  
 No passwords. No redirects. Just ✨ one-click login ✨

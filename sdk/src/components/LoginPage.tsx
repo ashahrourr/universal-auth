@@ -1,5 +1,4 @@
 import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
 import { LoginComponentProps } from "./LoginComponentProps"
 
 const LoginPage: React.FC<
@@ -13,7 +12,6 @@ const LoginPage: React.FC<
   const [email, setEmail] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState("")
-  const navigate = useNavigate()
 
   const validateEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -31,7 +29,6 @@ const LoginPage: React.FC<
 
     try {
       await onSubmit?.(email)
-      navigate("/")
     } catch {
       setError(translations.errorLoginFailed ?? "Login failed.")
     } finally {
@@ -79,11 +76,11 @@ const LoginPage: React.FC<
           }}
         >
           {isSubmitting
-            ? translations.loginButton ?? "Logging in..."
+            ? translations.loggingIn ?? "Logging in..."
             : translations.loginButton ?? "Login with Universal ID"}
         </button>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", marginTop: "1rem" }}>
           <label style={{ fontSize: "0.875rem", color: "#374151" }}>
             {translations.emailLabel ?? "Email"}{" "}
             <span style={{ color: "#9ca3af", marginLeft: "0.25rem" }}>

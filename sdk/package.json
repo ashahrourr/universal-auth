@@ -1,6 +1,6 @@
 {
   "name": "@ashahrour/universal-auth",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "1-click login SDK for modern web apps. No passwords. No config.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

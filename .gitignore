@@ -17,8 +17,6 @@ out/
 
 # Logs
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # IDE/editor files
 .vscode/
@@ -26,7 +24,7 @@ yarn-error.log*
 .DS_Store
 
 # Demo app (optional - if you don't want to commit it)
-demo_app/
+my_app/
 
 # OS metadata
 Thumbs.db

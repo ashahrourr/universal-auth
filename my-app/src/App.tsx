@@ -1,18 +1,25 @@
 // src/App.tsx
-import { Navigate } from "react-router-dom"
-import { useAuth } from "../../sdk/src"
+import { useAuth } from "../../sdk/src/hooks/useAuth"
 
 function App() {
-  const { user, logout, loading } = useAuth()
+  const { user, login, logout, loading } = useAuth()
 
   if (loading) return <p>Loading...</p>
-  if (!user) return <Navigate to="/login" replace />
 
   return (
-    <div style={{ padding: 40, textAlign: "center" }}>
-      <h1>Universal Auth Demo</h1>
-      <p>✅ Logged in as: <strong>{user.id}</strong></p>
-      <button onClick={logout}>Logout</button>
+    <div style={{ padding: "2rem", fontFamily: "sans-serif", textAlign: "center" }}>
+      {user ? (
+        <>
+          <h2>Welcome, {user.id} 🎉</h2>
+          <p style={{ maxWidth: 400, margin: "1rem auto", wordBreak: "break-word" }}>{user.token}</p>
+          <button onClick={logout}>Logout</button>
+        </>
+      ) : (
+        <>
+          <h2>You are not logged in</h2>
+          <button onClick={() => login("")}>Login with Universal ID</button>
+        </>
+      )}
     </div>
   )
 }

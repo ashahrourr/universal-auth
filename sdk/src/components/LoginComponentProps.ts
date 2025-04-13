@@ -9,6 +9,7 @@ export interface LoginComponentProps {
     welcomeMessage?: string
     emailLabel?: string
     loginButton?: string
+    loggingIn?: string // ✅ Add this line
     emailOptionalHint?: string
     errorInvalidEmail?: string
     errorLoginFailed?: string
