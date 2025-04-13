@@ -24,7 +24,7 @@ npm-debug.log*
 .DS_Store
 
 # Demo app (optional - if you don't want to commit it)
-my_app/
+my-app/
 
 # OS metadata
 Thumbs.db
