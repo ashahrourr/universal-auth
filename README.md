@@ -97,7 +97,6 @@ function App() {
 - ✅ Uses `localStorage` to store JWT and refresh tokens  
 - 🔁 Automatically refreshes access tokens before expiration  
 - 🔐 Email is optional and used for account recovery  
-- ⚠️ For production, use HTTPS and consider CSRF protection
 
 ---
 
