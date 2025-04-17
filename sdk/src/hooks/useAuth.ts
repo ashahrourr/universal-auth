@@ -6,3 +6,4 @@ export const useAuth = () => {
   const { user, loading, handleLogin, logout } = useAuthContext()
   return { user, loading, login: handleLogin, logout }
 }
+ // testing what the diff
