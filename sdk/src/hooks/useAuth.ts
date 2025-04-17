@@ -6,4 +6,4 @@ export const useAuth = () => {
   const { user, loading, handleLogin, logout } = useAuthContext()
   return { user, loading, login: handleLogin, logout }
 }
- // testing what the diff
+ // testing what the diff testting now in branch
